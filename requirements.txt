@@ -1,8 +1,11 @@
+flask
 streamlit
 openai
-groq
 python-dotenv
-SpeechRecognition
-pyttsx3
-PyAudio
-PyQt6
+faiss-cpu
+sentence-transformers
+numpy
+langchain-text-splitters
+nltk
+tqdm
+google-generativeai

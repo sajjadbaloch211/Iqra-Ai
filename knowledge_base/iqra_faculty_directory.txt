@@ -1,0 +1,56 @@
+### IQRA UNIVERSITY FULL FACULTY DIRECTORY (FEST & CS)
+
+LIST OF 45+ TEACHERS AND DESIGNATIONS:
+1. Engr. Muhammad Kashif Majeed (Sr. Lecturer) - Applied Physics, Computer Architecture
+2. Shahzad Karim (Sr. Lecturer) - Computer Org & Assembly, Data Communications
+3. Syed Zain Mir (Sr. Lecturer) - Complex Variables, Multivariable Calculus
+4. Engr. Muhammad Daud Abbasi (Sr. Lecturer) - Operating Systems, COAL
+5. Dr. Rizwan Munir (Asst. Professor) - HCI, Software Engineering, Machine Learning
+6. Muhammad Hassam Shakil (Sr. Lecturer) - Compiler Construction, Theory of Automata
+7. Dr. Waleed Bin Yousuf (Asst. Professor) - Communication Systems, Engineering Economics
+8. Haider Abbas Naqvi (Faculty) - Applied Physics, Electrical Power
+9. Asif Ali (Shahmiri) (Lecturer) - OOP, Web Engineering
+10. Dr. Hamid Saeed Khan (Asst. Professor) - Numerical Computing, Machine Learning
+11. Dr. Syed Safdar Hussain (Asst. Professor) - Big Data Analytics, DW&DM
+12. Azeem Aftab (Sr. Lecturer) - Data Structures, Operating Systems
+13. Ilyas Younus (Faculty) - Programming Fundamentals, COAL
+14. Mr. Monis Ahmed Thakur (Sr. Lecturer) - Business Analytics, Statistics
+15. Dr. Israr Ali (Program Incharge, CS) - Data Warehouse, Data Structures
+16. Fahad Najeeb (Sr. Lecturer) - Computer Vision, AI
+17. Mr. Ali Ahmad Siddiqui (Asst. Professor) - Information Security, Routing & Switching
+18. Umme Kulsoom (Sr. Lecturer) - OOP, Programming Fundamentals, AI
+19. Asad Ur Rehman (Sr. Lecturer) - Software Project Management, Requirement Engineering
+20. Shahzad Ahmed (Sr. Lecturer) - NLP, Mobile App Development, DSA
+21. Shilpa Kumari (Lecturer) - Applied Physics, DBMS
+22. Adnan Faisal (Lecturer) - IOT, Digital Communication
+23. Muhammad Rahil Abbasi (Sr. Lecturer) - Programming Fundamentals, DBMS
+24. Abdul Kareem Kashif Baig (Lecturer) - AICT, COAL
+25. Maaz Ahmed (Sr. Lecturer) - Theory of Automata, Discrete Structures
+26. Syed Saad Luqman (Sr. Lecturer) - Software Construction, OOP, SAD
+27. Ali Muhammad (Sr. Lecturer) - DLD, AICT
+28. M Ahsan Naeem (Lecturer) - Cloud Computing, Virtualization
+29. Ariz Muhammad Brohi (Sr. Lecturer) - ICT, Applications of ICT
+30. Ahmed Mujtaba (Lecturer) - Analysis of Algorithms, Theory of Automata
+31. Ayaz Hussain Abbasi (Sr. Lecturer) - Network Security, Digital Forensics
+32. M. Faizan Khan (Sr. Lecturer) - Data Structures, Programming Fundamentals
+33. Noureen Fatima Urf Poonam (Sr. Lecturer) - Programming for AI, Data Mining
+34. Ammar Ali Qazi (Lecturer) - Routing & Switching, Cyber Security
+35. Majida Hassan Ghouri (Lecturer) - COAL, Computer Networks
+36. Engr. Faiza (Lecturer) - Digital Logic Design, Programming Fundamentals
+37. Sabah (Lecturer) - Programming Fundamentals, App of ICT
+38. Aziz Mehmood Farooqi (Sr. Lecturer) - OOP, DBMS
+39. M Kariz Kamal (Sr. Lecturer) - Computer Networks, Information Security
+40. Engr. Areeb Anis Khan (Sr. Lecturer) - Computer Networks, Telecom Transmission
+41. Muhammad Tahir (Sr. Lecturer) - Software Quality Assurance, SQA
+42. Ali Hassan Sial (Lecturer) - Operating Systems, App of ICT
+43. Engr. Ghulam Qasim (Lecturer) - Software Engineering, SQA
+44. Engr. Farhan Ghafoor (Sr. Lecturer) - Design & Analysis of Algorithms, Business Intelligence
+45. Abdul Wahab Khan (Sr. Lecturer) - Formal Methods, Design & Analysis of Algorithms
+46. Abdul Mateen Shahzaib Asad (Lecturer) - Programming Fundamentals, Math
+47. Imdad Ali Shah (Lecturer) - Software Engineering, ICT
+48. Zuha Soomro (Lecturer) - HCI, ASD
+49. Ms. Atruba Feroze (Junior Lecturer) - Machine Learning, PFAI
+50. Ms Rukhsana Majeed (Sr. Lecturer) - Digital Logic Design, DBMS
+51. Umna Iftikhar (Sr. Lecturer) - Computer Networks, DBMS
+52. Mr. Sarang Ahmed (Lecturer) - OOP, DBMS, DSA
+53. Falak Memon (Lecturer) - AICT, Discrete Structures

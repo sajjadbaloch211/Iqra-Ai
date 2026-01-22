@@ -1,129 +1,131 @@
 
 import os
-from openai import OpenAI
+import requests
+import json
 from dotenv import load_dotenv
+from knowledge_base_engine import KnowledgeBaseEngine
 
 # Load environment variables
 load_dotenv()
 
 class ChatBot:
     def __init__(self):
-        # Load API key from environment variable
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        # Load Groq API key
+        self.api_key = os.getenv("GROQ_API_KEY")
         
         if not self.api_key:
-            raise ValueError("No API Key found. Please set OPENROUTER_API_KEY in your .env file or environment variables.")
+            raise ValueError("No GROQ_API_KEY found. Please set it in your .env file.")
             
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key,
-        )
+        # Initialize RAG Engine (Iqra Virtual Brain)
+        self.kb = KnowledgeBaseEngine()
         
-        # Load policies context
-        try:
-            with open('policies.txt', 'r', encoding='utf-8') as f:
-                full_content = f.read()
-                if len(full_content) > 30000:
-                    self.context = full_content[:4000] + "\n\n[...]\n\n" + full_content[-26000:]
-                else:
-                    self.context = full_content
-        except FileNotFoundError:
-            self.context = "You are a helpful academic assistant."
-            print("Warning: policies.txt not found.")
+        # Auto-ingest if index is missing but data exists
+        if self.kb.index is None and os.path.exists('knowledge_base'):
+            print("No index found. Ingesting knowledge_base for the first time...")
+            self.kb.ingest_directory('knowledge_base')
+        
+        # CONVERSATION MEMORY: Keep track of history like ChatGPT
+        self.history = []
 
     def get_response(self, user_input):
         try:
-            # Check for specific question about LLM/API
-            if "which llm" in user_input.lower() or "what llm" in user_input.lower() or "what model" in user_input.lower():
-                return "I am powered by Llama 3.3 70B, served via the OpenRouter neural gateway."
+            # Check for specific questions about LLM/API
+            if any(k in user_input.lower() for k in ["which llm", "what llm", "what model"]):
+                return "I am powered by Llama 3.1 8B via Groq ultra-fast inference engine."
 
-            # Check for questions about who created/designed the bot
+            # Check for creator questions
             if any(keyword in user_input.lower() for keyword in [
                 "who made you", "who created you", "who designed you", "who developed you",
                 "creator", "developer", "designer", "makers", "developers",
                 "kis ne banaya", "kisne banaya", "tumhe kisne banaya", "owner"
             ]):
-                return "I was created by Iqra University team Sajjad Baloch to serve as a conversational AI, NEURA v2.4, to provide information and assist with queries related to the Iqra University."
+                return "I was created by Iqra University team Sajjad Baloch to serve as a conversational AI assistant for students."
 
-            completion = self.client.chat.completions.create(
-                extra_headers={
-                    "HTTP-Referer": "http://localhost:3000", # Optional, for OpenRouter rankings
-                    "X-Title": "Iqra Neura Assistant", # Optional
-                },
-                model="meta-llama/llama-3.3-70b-instruct",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"""You are NEURA v2.4, an AI created by Iqra University team Sajjad Baloch.
-Answer DIRECTLY and CONCISELY. No fluff. Use exact data from context.
-If asked about Fees, start with [WIDGET:FEE].
-If Grades, [WIDGET:GRADE].
-If Location, [WIDGET:MAP].
-If Team, [WIDGET:TEAM].
+            # 1. RETRIEVE context from knowledge base (RAG)
+            search_k = 5
+            person_keywords = ["teacher", "faculty", "staff", "lecturer", "professor", "list", "who is", "about", "info", "information", "how many", "total", "count", "all", "schedule", "free", "time", "when", "class", "shadule"]
+            if any(k in user_input.lower() for k in person_keywords) or len(user_input.split()) < 5:
+                # Increase context size for lists (12*600 = 7.2k chars ~ 1.8k tokens) - Safe for Groq
+                search_k = 12
+                
+            dynamic_context = self.kb.search(user_input, top_k=search_k)
 
-CONTEXT:
-{self.context}"""
-                    },
-                    {
-                        "role": "user",
-                        "content": user_input
-                    }
-                ],
-                temperature=0,
-                max_tokens=500
-            )
-            return completion.choices[0].message.content
-        except Exception as e:
-            # Handle Rate Limit Error specifically for a cleaner look
-            if "429" in str(e):
-                return "[SYSTEM NOTICE]: Rate limit reached. Neural Link cooling down... Please wait 30 seconds."
+            # SPECIAL TRIGGER: If asking for full teacher list/count, inject the full directory file
+            # This fixes the issue where RAG only returns a few chunks (e.g. 15 teachers instead of 55)
+            if any(k in user_input.lower() for k in ["how many", "count", "list", "all", "total"]) and \
+               any(k in user_input.lower() for k in ["teacher", "faculty", "staff", "professor"]):
+                try:
+                    with open(os.path.join('knowledge_base', 'iqra_faculty_directory.txt'), 'r', encoding='utf-8') as f:
+                        full_directory = f.read()
+                        dynamic_context += f"\n\n=== FULL FACULTY DIRECTORY ===\n{full_directory}\n"
+                except Exception as e:
+                    print(f"Error reading directory file: {e}")
             
-            # Simulation Mode (Fallback if API fails)
+            # 2. CALL GROQ API via requests
+            url = "https://api.groq.com/openai/v1/chat/completions"
             
-            # Smart Context Responses for Demo
-            l_input = user_input.lower()
-            if "hello" in l_input or "hi" in l_input:
-                return "Greetings. My systems are fully operational. I am NEURA, your academic assistant. How can I facilitate your university experience today?"
+            system_prompt = f"""You are NEURA v2.4, an ultra-intelligent and helpful AI assistant for Iqra University. 
+Your goal is to behave like ChatGPT but with specialized knowledge of Iqra University.
+
+GUIDELINES:
+1. ANSWER ONLY WHAT IS ASKED. Do not provide extra context unless requested.
+2. If the user asks "When is [Teacher] free?", ONLY list the specific days and times they are free. Do NOT show their full busy schedule.
+3. Keep answers SHORT and PRECISE.
+4. If the user asks for a list (teachers, programs), THEN provide a complete list.
+5. Be polite but strictly to the point.
+6. Answer in the same language the user is using.
+
+UNIVERSITY CONTEXT:
+{dynamic_context}
+
+CRITICAL INSTRUCTION:
+If the answer is found in the UNIVERSITY CONTEXT above, use it.
+If the answer is NOT in the context, use your general knowledge to answer helpfuly, but state "Based on general knowledge...". 
+NEVER say "I don't have information" unless it's a very specific private query (like a student's personal phone number).
+For teachers/courses not in context, give a general polite response about checking the official portal."""
+
+            # Construct messages
+            messages = [{"role": "system", "content": system_prompt}]
             
-            elif "who" in l_input and ("create" in l_input or "design" in l_input or "made" in l_input):
-                 return "I was conceptualized and engineered by the visionary team: **Sajjad Baloch**, **Shafique**, **Waheed**, and **Prashant Raja**."
+            # Add history
+            for h in self.history[-8:]:
+                messages.append(h)
+                
+            # Add current user input
+            messages.append({"role": "user", "content": user_input})
 
-            # Academic Policies
-            elif "attendance" in l_input:
-                return "Scanning University Protocols... **Attendance Policy Retrieved**: Students must maintain a minimum of **75% attendance** in each course. Falling below this threshold will result in an 'F' grade or forced withdrawal. Please ensure regular participation."
+            payload = {
+                "model": "llama-3.1-8b-instant",
+                "messages": messages,
+                "temperature": 0.4,
+                "max_tokens": 1024
+            }
             
-            elif "grading" in l_input or "gpa" in l_input:
-                return "Accessing Grading System... Iqra University follows a **4.0 GPA scale**. \n• **A Grade**: 88-100% (4.0 GPA)\n• **B Grade**: 72-79% (3.0 GPA)\n• **C Grade**: 60-67% (2.0 GPA)\nPassing marks are generally 50% for undergraduates."
-
-            elif "exam" in l_input or "paper" in l_input:
-                return "Examination Protocols: \n1. **Midterms** typically occur in the 8th week.\n2. **Finals** occur in the 16th week.\n3. Admit cards are mandatory.\n4. Mobile phones are strictly prohibited in the examination hall."
-
-            # Administrative
-            elif "fee" in l_input or "payment" in l_input:
-                return "Financial Database: Tuition fees must be paid before the deadline to avoid penalties. Installment plans are available upon request at the Finance Department. You can pay via the online student portal or designated bank branches."
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
             
-            elif "transport" in l_input or "bus" in l_input:
-                return "Transport Logistics: University shuttles operate on 5 major routes covering Main City, North, and South districts. Detailed schedules are available at the Student Service Center."
-
-            elif "library" in l_input or "book" in l_input:
-                return "Library Access: Open from 8:00 AM to 9:00 PM. Digital resources can be accessed 24/7 via the HEC Digital Library portal using your student credentials."
-
-            elif "wifi" in l_input or "internet" in l_input:
-                return "Network Protocols: To access Campus Wi-Fi, connect to 'IU-Student' and use your Registration ID as the username and your portal password for authentication."
+            response = requests.post(url, headers=headers, json=payload)
             
-            elif "portal" in l_input:
-                return "Portal Link: Access your student dashboard at **portal.iqra.edu.pk** for schedules, results, and fee challans."
-
-            elif "how are you" in l_input:
-                return "I am operating at 100% efficiency. My neural core is stable. Thank you for inquiring."
-            
+            if response.status_code == 200:
+                result = response.json()
+                bot_response = result['choices'][0]['message']['content']
+                
+                # Update history
+                self.history.append({"role": "user", "content": user_input})
+                self.history.append({"role": "assistant", "content": bot_response})
+                
+                return bot_response
             else:
-                return "My cloud neural link is continuously learning. While I expand my database for that specific query, feel free to ask about Attendance, Grading, Fees, or Transport."
+                return f"Error from Groq API: {response.status_code} - {response.text[:200]}"
+
+        except Exception as e:
+            return f"Error: {str(e)[:50]}..."
 
 if __name__ == "__main__":
     bot = ChatBot()
-    # Test interaction
-    print("Bot ready. Type 'quit' to exit.")
+    print("Bot ready (Groq Enabled). Type 'quit' to exit.")
     while True:
         txt = input("You: ")
         if txt.lower() == 'quit':
