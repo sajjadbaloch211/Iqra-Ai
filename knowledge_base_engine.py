@@ -7,11 +7,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class KnowledgeBaseEngine:
     def __init__(self, model_name='all-MiniLM-L6-v2', db_path='iqra_brain.index', metadata_path='iqra_metadata.pkl'):
-        self.model = SentenceTransformer(model_name)
+      self.model = SentenceTransformer(model_name, device='cpu')
         self.db_path = db_path
         self.metadata_path = metadata_path
         self.index = None
         self.metadata = []
+        
+
+        
         
         # Load existing index if available
         if os.path.exists(self.db_path) and os.path.exists(self.metadata_path):
