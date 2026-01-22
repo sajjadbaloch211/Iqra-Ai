@@ -7,7 +7,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class KnowledgeBaseEngine:
     def __init__(self, model_name='all-MiniLM-L6-v2', db_path='iqra_brain.index', metadata_path='iqra_metadata.pkl'):
-        self.model = SentenceTransformer(model_name)
+        # Explicitly force CPU to avoid CUDA/Torch errors on Streamlit Cloud
+        self.model = SentenceTransformer(model_name, device='cpu')
         self.db_path = db_path
         self.metadata_path = metadata_path
         self.index = None
