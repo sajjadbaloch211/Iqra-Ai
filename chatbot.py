@@ -10,11 +10,22 @@ load_dotenv()
 
 class ChatBot:
     def __init__(self):
-        # Load Groq API key
+        # Load Groq API key from End/Secrets
         self.api_key = os.getenv("GROQ_API_KEY")
         
+        # Fallback for Streamlit Cloud
         if not self.api_key:
-            raise ValueError("No GROQ_API_KEY found. Please set it in your .env file.")
+            try:
+                import streamlit as st
+                if "GROQ_API_KEY" in st.secrets:
+                    self.api_key = st.secrets["GROQ_API_KEY"]
+            except ImportError:
+                pass
+            except Exception:
+                pass # st.secrets might not be initialized
+        
+        if not self.api_key:
+            raise ValueError("No GROQ_API_KEY found. Please set it in your .env file or Streamlit Secrets.")
             
         # Initialize RAG Engine (Iqra Virtual Brain)
         self.kb = KnowledgeBaseEngine()
